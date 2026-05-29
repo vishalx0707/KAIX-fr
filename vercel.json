@@ -1,5 +1,8 @@
 {
   "cleanUrls": true,
+  "builds": [
+    { "src": "public/**/*", "use": "@vercel/static" }
+  ],
   "routes": [
     { "src": "/app.html", "status": 404 },
     { "src": "/app.js", "status": 404 },
