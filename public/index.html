@@ -1,205 +1,595 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>kaix fr — reel prompt forge</title>
-<link rel="stylesheet" href="/style.css" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>kaix fr — cinematic prompt forge & style fusion</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&family=Outfit:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #121210;
+      --bg-card: rgba(26, 26, 23, 0.6);
+      --bg-card-hover: rgba(36, 36, 32, 0.85);
+      --border-color: rgba(255, 255, 255, 0.05);
+      --border-color-hover: rgba(255, 255, 255, 0.1);
+      --primary-green: #bef264;
+      --primary-green-glow: rgba(190, 242, 100, 0.15);
+      --accent-purple: #c084fc;
+      --accent-purple-glow: rgba(192, 132, 252, 0.15);
+      --text-main: #f4f4f5;
+      --text-muted: #a1a1aa;
+      --text-dim: #71717a;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: 'Outfit', sans-serif;
+      overflow-x: hidden;
+      line-height: 1.6;
+      position: relative;
+    }
+
+    /* Ambient Background Pattern & Light Glows */
+    body::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .glow-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(150px);
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.3;
+    }
+
+    .orb-left {
+      top: 5%;
+      left: -100px;
+      width: 600px;
+      height: 600px;
+      background: var(--primary-green-glow);
+    }
+
+    .orb-right {
+      top: 30%;
+      right: -100px;
+      width: 700px;
+      height: 700px;
+      background: var(--accent-purple-glow);
+    }
+
+    .container {
+      max-width: 1280px; /* Increased from 1200px */
+      margin: 0 auto;
+      padding: 0 2rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Top Navigation */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 2.5rem 0 1.5rem;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 4px;
+      background: var(--primary-green);
+      box-shadow: 0 0 12px var(--primary-green);
+    }
+
+    .brand-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: #ffffff;
+    }
+
+    .brand-name span {
+      color: var(--primary-green);
+    }
+
+    .nav-actions {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: color 0.2s ease;
+    }
+
+    .nav-link:hover {
+      color: #ffffff;
+    }
+
+    .btn-download {
+      background: var(--primary-green);
+      color: #121210;
+      border: none;
+      padding: 0.6rem 1.4rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-download:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 15px rgba(190, 242, 100, 0.4);
+    }
+
+    /* Hero / Grid Layout */
+    .hero-section {
+      display: grid;
+      grid-template-columns: 1fr 2.1fr; /* Increased space for funnel columns */
+      gap: 4rem;
+      align-items: center;
+      padding: 5rem 0 7rem;
+    }
+
+    @media (max-width: 992px) {
+      .hero-section {
+        grid-template-columns: 1fr;
+        gap: 3.5rem;
+        padding: 3rem 0 5rem;
+      }
+    }
+
+    /* Hero Text Column */
+    .hero-info {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .category-tag {
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--primary-green);
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-title {
+      font-family: 'Lora', serif;
+      font-size: 3.5rem;
+      font-weight: 500;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      margin-bottom: 2rem;
+      color: #ffffff;
+    }
+
+    .hero-title span {
+      display: block;
+      color: var(--primary-green);
+      font-style: italic;
+      font-weight: 400;
+    }
+
+    @media (max-width: 768px) {
+      .hero-title {
+        font-size: 2.8rem;
+      }
+    }
+
+    /* CLI Terminal Link */
+    .cli-box {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.85rem 1.25rem;
+      font-family: monospace;
+      font-size: 0.85rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2.5rem;
+      color: #e4e4e7;
+    }
+
+    .cli-cmd {
+      color: #a3e635;
+    }
+
+    .cli-copy {
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      cursor: pointer;
+      font-size: 0.75rem;
+      transition: color 0.2s;
+    }
+
+    .cli-copy:hover {
+      color: #ffffff;
+    }
+
+    .cta-row {
+      display: flex;
+      gap: 1.25rem;
+      width: 100%;
+      flex-wrap: wrap;
+    }
+
+    .btn-hero {
+      flex: 1;
+      min-width: 160px;
+      text-align: center;
+      padding: 0.95rem 2rem;
+      border-radius: 8px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+    }
+
+    .btn-hero-primary {
+      background: #ffffff;
+      color: #121210;
+    }
+
+    .btn-hero-primary:hover {
+      background: #e4e4e7;
+      transform: translateY(-2px);
+    }
+
+    .btn-hero-outline {
+      border: 1px solid var(--border-color);
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .btn-hero-outline:hover {
+      border-color: var(--border-color-hover);
+      background: rgba(255, 255, 255, 0.05);
+      transform: translateY(-2px);
+    }
+
+    .hero-desc {
+      color: var(--text-muted);
+      font-size: 1rem;
+      margin-top: 2rem;
+      font-weight: 300;
+    }
+
+    /* Visual Funnel Column */
+    .funnel-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      width: 100%;
+    }
+
+    @media (max-width: 576px) {
+      .funnel-container {
+        flex-direction: column;
+        align-items: center;
+        gap: 3rem;
+      }
+    }
+
+    .panel-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+      flex: 1;
+      width: 100%;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      padding-bottom: 0.75rem;
+    }
+
+    .panel-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1rem;
+      font-weight: 500;
+      color: #ffffff;
+    }
+
+    .panel-badge {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+    }
+
+    .raw-image-box {
+      border-radius: 8px;
+      overflow: hidden;
+      height: 360px; /* Increased from 320px or aspect-ratio constraint */
+      background: #0d0d0c;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      position: relative;
+    }
+
+    .raw-image-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain; /* Make sure the full screenshot fits nicely */
+    }
+
+    /* Funnel Graphic Connector */
+    .funnel-connector {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      width: 80px; /* Fixed width to prevent squishing */
+      flex-shrink: 0;
+    }
+
+    .funnel-shape {
+      width: 60px;
+      height: 100px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .funnel-shape::before {
+      content: "";
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(ellipse at center, rgba(190, 242, 100, 0.2) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .funnel-icon {
+      font-size: 1.75rem;
+      color: var(--primary-green);
+      animation: rotate-pulse 4s infinite linear;
+    }
+
+    @keyframes rotate-pulse {
+      0% { transform: rotate(0deg) scale(1); }
+      50% { transform: rotate(180deg) scale(1.15); }
+      100% { transform: rotate(360deg) scale(1); }
+    }
+
+    .ratio-badge {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.75rem;
+      color: var(--primary-green);
+      font-weight: 700;
+      border: 1px solid var(--primary-green);
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      background: rgba(190, 242, 100, 0.05);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+    }
+
+    /* Extracted JSON Card */
+    .json-code {
+      font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+      font-size: 0.88rem; /* Slightly larger readable text */
+      color: #e4e4e7;
+      white-space: pre; /* Use pre to prevent line wraps */
+      line-height: 1.7;
+      padding: 0.5rem;
+      overflow-x: auto;
+      width: 100%;
+    }
+
+    .json-key { color: var(--accent-purple); }
+    .json-string { color: var(--primary-green); }
+    .json-val { color: #f43f5e; }
+
+    /* Footer Section */
+    footer {
+      border-top: 1px solid var(--border-color);
+      padding: 4rem 0;
+      text-align: center;
+      color: var(--text-dim);
+    }
+
+    .footer-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .footer-logo-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 3px;
+      background: var(--primary-green);
+    }
+
+    .footer-text {
+      font-size: 0.85rem;
+      font-weight: 400;
+      margin-bottom: 1rem;
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+    }
+
+    .footer-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      transition: color 0.2s ease;
+    }
+
+    .footer-link:hover {
+      color: #ffffff;
+    }
+  </style>
 </head>
 <body>
-<div class="grain"></div>
 
-<header>
-  <div class="brand">
-    <span class="dot"></span>
-    <h1>kaix fr</h1>
-    <span class="tag">reel prompt forge</span>
-    <button id="history-btn" class="ghost header-btn">⏱ history</button>
+  <!-- Background Orbs -->
+  <div class="glow-orb orb-left"></div>
+  <div class="glow-orb orb-right"></div>
+
+  <div class="container">
+    <!-- Header Navigation -->
+    <header>
+      <div class="brand">
+        <div class="brand-dot"></div>
+        <div class="brand-name">kaix<span>fr</span></div>
+      </div>
+      <div class="nav-actions">
+        <a href="https://github.com/vishalx0707/KAIX-fr" target="_blank" class="nav-link">GitHub</a>
+        <a href="https://github.com/vishalx0707/KAIX-fr/archive/refs/heads/main.zip" class="btn-download">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          Download Zip
+        </a>
+      </div>
+    </header>
+
+    <!-- Hero Area (Funnel & Info) -->
+    <section class="hero-section">
+      <!-- Info Column -->
+      <div class="hero-info">
+        <div class="category-tag">cinematic prompt forge & style fusion</div>
+        <h1 class="hero-title">
+          Describe the reel. <span>Get a paste-ready prompt.</span>
+        </h1>
+        
+        <div class="cli-box">
+          <div>$ <span class="cli-cmd">git clone https://github.com/vishalx0707/KAIX-fr.git</span></div>
+          <button class="cli-copy" onclick="navigator.clipboard.writeText('git clone https://github.com/vishalx0707/KAIX-fr.git'); alert('Copied to clipboard!')">Copy</button>
+        </div>
+
+        <div class="cta-row">
+          <a href="https://github.com/vishalx0707/KAIX-fr" target="_blank" class="btn-hero btn-hero-primary">
+            View on GitHub
+          </a>
+          <a href="https://github.com/vishalx0707/KAIX-fr/archive/refs/heads/main.zip" class="btn-hero btn-hero-outline">
+            Get Compressed Zip
+          </a>
+        </div>
+
+        <p class="hero-desc">
+          KAIX fr translates simple text descriptions into highly detailed, designer-grade cinematic prompts for image and video AI generation models, fused with visual styles extracted from your reference images.
+        </p>
+      </div>
+
+      <!-- Funnel Column -->
+      <div class="funnel-container">
+        <!-- Left Panel: Product Interface Screenshot -->
+        <div class="panel-card">
+          <div class="panel-header">
+            <span class="panel-title">workspace</span>
+            <span class="panel-badge">UI SCREENSHOT</span>
+          </div>
+          <div class="raw-image-box">
+            <img src="taste-layout.png" alt="kaix fr workspace user interface layout" />
+          </div>
+        </div>
+
+        <!-- Middle: Extraction Connector -->
+        <div class="funnel-connector">
+          <div class="funnel-shape">
+            <span class="funnel-icon">✦</span>
+          </div>
+          <div class="ratio-badge">extract style</div>
+        </div>
+
+        <!-- Right Panel: Taste JSON Output -->
+        <div class="panel-card">
+          <div class="panel-header">
+            <span class="panel-title">taste profile</span>
+            <span class="panel-badge">STYLE JSON</span>
+          </div>
+          <div class="raw-image-box" style="background: #0d0d0c; padding: 1.5rem; align-items: flex-start; justify-content: flex-start; overflow-y: auto;">
+            <div class="json-code">{
+  <span class="json-key">"look"</span>: <span class="json-string">"teal-amber nocturnal"</span>,
+  <span class="json-key">"lighting"</span>: <span class="json-string">"single neon, low-key"</span>,
+  <span class="json-key">"blur"</span>: <span class="json-string">"soft lens haze"</span>,
+  <span class="json-key">"grain"</span>: <span class="json-string">"fine film grain"</span>,
+  <span class="json-key">"shadows"</span>: <span class="json-string">"crushed teal-green"</span>,
+  <span class="json-key">"contrast"</span>: <span class="json-string">"punchy hazy"</span>,
+  <span class="json-key">"camera"</span>: <span class="json-string">"anamorphic cine"</span>,
+  <span class="json-key">"mood"</span>: <span class="json-string">"melancholic"</span>
+}</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <div class="footer-logo">
+        <div class="footer-logo-dot"></div>
+        <div class="brand-name">kaix<span>fr</span></div>
+      </div>
+      <p class="footer-text">&copy; 2026 KAIX fr. All rights reserved. Open-source local-first workflow.</p>
+      <div class="footer-links">
+        <a href="https://github.com/vishalx0707/KAIX-fr" target="_blank" class="footer-link">GitHub</a>
+        <a href="https://github.com/vishalx0707/KAIX-fr/archive/refs/heads/main.zip" class="footer-link">Download Zip</a>
+      </div>
+    </footer>
+
   </div>
-  <p class="sub">describe the reel. get a paste-ready prompt + the reference image to pair with it.</p>
-</header>
 
-<aside id="history-drawer" class="drawer hidden">
-  <div class="drawer-head">
-    <h2>history</h2>
-    <button id="history-close" class="mini-btn">close</button>
-  </div>
-  <div id="history-list" class="history-list"></div>
-</aside>
-<aside id="cli-drawer" class="drawer hidden">
-  <div class="drawer-head">
-    <h2>local CLI</h2>
-    <button id="cli-close" class="mini-btn">close</button>
-  </div>
-  <div class="drawer-note">Use any local CLI installed on this machine. The app sends prompts through stdin and reads JSON back.</div>
-  <div id="cli-list" class="tool-list"></div>
-  <div class="drawer-note">Custom CLI</div>
-  <input id="custom-cli-label" class="text-input" placeholder="label, e.g. My CLI" />
-  <input id="custom-cli-command" class="text-input" placeholder="command, e.g. opencode" />
-  <input id="custom-cli-args" class="text-input" placeholder="args, e.g. run --stdin" />
-  <label class="check-row"><input id="custom-cli-images" type="checkbox" /> supports image input</label>
-  <button id="custom-cli-save" class="primary small-primary">add custom CLI</button>
-</aside>
-<div id="drawer-backdrop" class="drawer-backdrop hidden"></div>
-
-<main>
-  <section class="composer">
-   <div class="composer-cols">
-    <div class="composer-main">
-    <div class="mode-row">
-      <div class="seg" id="workflow-seg" title="choose what the app should do">
-        <button class="seg-btn active" data-workflow="prompt">prompt</button>
-        <button class="seg-btn" data-workflow="generate">generate</button>
-      </div>
-      <div class="seg" id="mode-seg">
-        <button class="seg-btn active" data-mode="video">video</button>
-        <button class="seg-btn" data-mode="image">image</button>
-      </div>
-      <button id="cli-open" type="button" class="mini-btn cli-open">
-        CLI: <span id="cli-label">select</span>
-      </button>
-    </div>
-
-    <div id="mcp-row" class="mcp-row hidden">
-      <button id="mcp-open" type="button" class="mini-btn">MCP: <span id="mcp-label">select generation tool</span></button>
-      <span class="dim">used only in generate mode</span>
-    </div>
-
-    <div class="base-row">
-      <div class="base-head">
-        <button id="ref-toggle" type="button" class="mini-btn">
-          <span id="ref-toggle-arrow">▶</span> reference image (optional) <span id="base-selected-name" class="dim"></span>
-        </button>
-        <button id="base-clear" type="button" class="mini-btn hidden">clear</button>
-      </div>
-      <div id="ref-panel" class="ref-panel hidden">
-        <div class="upload-zone" id="upload-zone">
-          <input type="file" id="upload-input" accept="image/*" multiple hidden />
-          <span class="upload-hint">drop / upload a new image, or <a id="upload-link">click to upload</a> — or click any image in your library below</span>
-        </div>
-      </div>
-    </div>
-
-    <div id="attach-chip" class="attach-chip hidden">
-      <img id="attach-thumb" alt="" />
-      <span id="attach-name"></span>
-      <button id="attach-remove" type="button" aria-label="remove">×</button>
-    </div>
-
-    <textarea id="request" placeholder="e.g. a girl walking through neon-lit rain in tokyo, lonely at 2am, looking back over her shoulder — or paste/drop an image here to attach"></textarea>
-
-    <div class="actions">
-      <input type="file" id="attach-input" accept="image/*" hidden />
-      <button id="attach-btn" type="button" class="ghost" title="attach an image (or drag/drop/paste into the box)">📎 attach</button>
-      <button id="go" class="primary">forge prompt</button>
-      <span id="status"></span>
-    </div>
-    </div><!-- /composer-main -->
-
-    <aside class="taste-side">
-      <div class="taste-side-head">
-        <span class="taste-side-title">✦ taste reference <span class="dim">style only</span></span>
-        <button id="taste-clear" type="button" class="mini-btn hidden">clear</button>
-      </div>
-      <p class="taste-hint-line">Borrows the <em>look</em> — light, blur, color, grain, mood, camera vibe — never the subject. Press <strong>extract taste</strong> to activate; if you don't, it's ignored on generate.</p>
-      <div class="upload-zone taste-zone-big" id="taste-zone" tabindex="0">
-        <input type="file" id="taste-input" accept="image/*" hidden />
-        <img id="taste-thumb" class="taste-thumb-preview hidden" alt="" />
-        <span class="upload-hint" id="taste-zone-hint">drop / paste an image, <a id="taste-upload-link">click to upload</a>, or tap ✦ on any library image below</span>
-      </div>
-      <div id="taste-chip" class="attach-chip hidden">
-        <span id="taste-name"></span>
-        <button id="taste-remove" type="button" aria-label="remove">×</button>
-      </div>
-      <button id="extract-taste" type="button" class="extract-btn" disabled>✦ extract taste</button>
-      <div class="taste-swatches-row hidden" id="taste-swatches-row" title="click to view extracted taste"></div>
-      <span id="taste-status" class="taste-status"></span>
-    </aside>
-   </div><!-- /composer-cols -->
-  </section>
-
-  <section id="result" class="result hidden">
-
-    <div id="fused-badge" class="fused-badge hidden">✦ taste fused — content preserved, style applied. <button id="fused-view" type="button">view taste</button></div>
-
-    <!-- THE PROMPT — headline, on top -->
-    <div id="prompts-container"></div>
-
-    <div class="card">
-      <div class="card-head"><h2>negative prompt</h2><button class="copy-btn" data-target="neg-text">copy</button></div>
-      <pre id="neg-text"></pre>
-    </div>
-
-    <!-- supporting analysis, below the prompt -->
-    <div class="section-divider"><span>the analysis behind it</span></div>
-
-    <div id="analysis-card" class="card hidden">
-      <div class="card-head"><h2>image analysis</h2></div>
-      <div class="analysis-body">
-        <div id="analysis-subject" class="ana-line"></div>
-
-        <div class="ana-section">
-          <div class="ana-label">palette</div>
-          <div id="palette" class="palette"></div>
-        </div>
-
-        <div class="ana-section">
-          <div class="ana-label">color grade</div>
-          <div id="grade-name" class="ana-val"></div>
-          <div id="grade-bar" class="grade-bar"></div>
-          <div id="grade-stops" class="grade-stops"></div>
-          <div id="grade-notes" class="ana-sub"></div>
-        </div>
-
-        <div class="ana-section">
-          <div class="ana-label">film stock / sensor</div>
-          <div id="stock-name" class="ana-val"></div>
-          <div id="stock-tells" class="ana-sub"></div>
-        </div>
-
-        <div class="ana-section">
-          <div class="ana-label">grain</div>
-          <div id="grain-type" class="ana-val"></div>
-          <div id="grain-meta" class="ana-sub"></div>
-        </div>
-
-        <div id="analysis-lighting" class="ana-line"></div>
-        <div id="analysis-composition" class="ana-line"></div>
-        <div id="analysis-mood" class="chips"></div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-head"><h2>designer breakdown</h2></div>
-      <div id="breakdown" class="breakdown"></div>
-    </div>
-
-    <div class="card">
-      <div class="card-head"><h2>style references</h2></div>
-      <div id="style-refs" class="style-refs"></div>
-    </div>
-
-    <div class="card">
-      <div class="card-head"><h2>reference images from your library</h2></div>
-      <div id="refs" class="refs"></div>
-    </div>
-
-    <div class="card">
-      <div class="card-head"><h2>audio pairing</h2></div>
-      <pre id="audio-text"></pre>
-    </div>
-  </section>
-
-  <section class="gallery">
-    <h2>your reference library</h2>
-    <div id="gallery" class="grid"></div>
-  </section>
-</main>
-
-<!-- Extracted-taste popup (opens only on click) -->
-<div id="taste-modal-backdrop" class="drawer-backdrop hidden"></div>
-<div id="taste-summary" class="taste-modal hidden" role="dialog" aria-label="extracted taste"></div>
-
-<script src="/app.js"></script>
 </body>
 </html>
