@@ -350,7 +350,7 @@
     .raw-image-box {
       border-radius: 8px;
       overflow: hidden;
-      height: 360px; /* Increased from 320px or aspect-ratio constraint */
+      aspect-ratio: 1.383; /* Matches the exact aspect ratio of taste-layout.png (1039x751) */
       background: #0d0d0c;
       display: flex;
       align-items: center;
@@ -362,7 +362,14 @@
     .raw-image-box img {
       width: 100%;
       height: 100%;
-      object-fit: contain; /* Make sure the full screenshot fits nicely */
+      object-fit: cover; /* Fits perfectly since aspect-ratio matches */
+    }
+
+    .json-box {
+      padding: 1.25rem;
+      align-items: flex-start;
+      justify-content: flex-start;
+      overflow-y: auto;
     }
 
     /* Funnel Graphic Connector */
@@ -560,7 +567,7 @@
             <span class="panel-title">taste profile</span>
             <span class="panel-badge">STYLE JSON</span>
           </div>
-          <div class="raw-image-box" style="background: #0d0d0c; padding: 1.5rem; align-items: flex-start; justify-content: flex-start; overflow-y: auto;">
+          <div class="raw-image-box json-box">
             <div class="json-code">{
   <span class="json-key">"look"</span>: <span class="json-string">"teal-amber nocturnal"</span>,
   <span class="json-key">"lighting"</span>: <span class="json-string">"single neon, low-key"</span>,
