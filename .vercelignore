@@ -1,15 +1,15 @@
-# Ignore backend and internal tool files for Vercel deployment
-server.js
-lib/
-download_grainy.ps1
-download_pin_915.ps1
-docs/
-analysis/
-images/
-taste-layout.png
-taste-popup.png
-cleaned-ui.png
-.gitignore
+# Ignore backend and internal tool files at the root level only
+/server.js
+/lib/
+/download_grainy.ps1
+/download_pin_915.ps1
+/docs/
+/analysis/
+/images/
+/taste-layout.png
+/taste-popup.png
+/cleaned-ui.png
+/.gitignore
 
 # Ignore internal tool files in public/
 public/app.html
