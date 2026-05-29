@@ -1,8 +1,6 @@
 # Ignore backend and internal tool files for Vercel deployment
 server.js
 lib/
-package.json
-package-lock.json
 download_grainy.ps1
 download_pin_915.ps1
 docs/
