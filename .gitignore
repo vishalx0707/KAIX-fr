@@ -1,0 +1,9 @@
+node_modules/
+history/
+images/uploads/
+.playwright-mcp/
+.kaix-fr/
+*.log
+server.out.log
+server.err.log
+.antigravitycli/

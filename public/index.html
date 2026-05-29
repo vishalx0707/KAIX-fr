@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>kaix fr — reel prompt forge</title>
+<link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+<div class="grain"></div>
+
+<header>
+  <div class="brand">
+    <span class="dot"></span>
+    <h1>kaix fr</h1>
+    <span class="tag">reel prompt forge</span>
+    <button id="history-btn" class="ghost header-btn">⏱ history</button>
+  </div>
+  <p class="sub">describe the reel. get a paste-ready prompt + the reference image to pair with it.</p>
+</header>
+
+<aside id="history-drawer" class="drawer hidden">
+  <div class="drawer-head">
+    <h2>history</h2>
+    <button id="history-close" class="mini-btn">close</button>
+  </div>
+  <div id="history-list" class="history-list"></div>
+</aside>
+<aside id="cli-drawer" class="drawer hidden">
+  <div class="drawer-head">
+    <h2>local CLI</h2>
+    <button id="cli-close" class="mini-btn">close</button>
+  </div>
+  <div class="drawer-note">Use any local CLI installed on this machine. The app sends prompts through stdin and reads JSON back.</div>
+  <div id="cli-list" class="tool-list"></div>
+  <div class="drawer-note">Custom CLI</div>
+  <input id="custom-cli-label" class="text-input" placeholder="label, e.g. My CLI" />
+  <input id="custom-cli-command" class="text-input" placeholder="command, e.g. opencode" />
+  <input id="custom-cli-args" class="text-input" placeholder="args, e.g. run --stdin" />
+  <label class="check-row"><input id="custom-cli-images" type="checkbox" /> supports image input</label>
+  <button id="custom-cli-save" class="primary small-primary">add custom CLI</button>
+</aside>
+<div id="drawer-backdrop" class="drawer-backdrop hidden"></div>
+
+<main>
+  <section class="composer">
+   <div class="composer-cols">
+    <div class="composer-main">
+    <div class="mode-row">
+      <div class="seg" id="workflow-seg" title="choose what the app should do">
+        <button class="seg-btn active" data-workflow="prompt">prompt</button>
+        <button class="seg-btn" data-workflow="generate">generate</button>
+      </div>
+      <div class="seg" id="mode-seg">
+        <button class="seg-btn active" data-mode="video">video</button>
+        <button class="seg-btn" data-mode="image">image</button>
+      </div>
+      <button id="cli-open" type="button" class="mini-btn cli-open">
+        CLI: <span id="cli-label">select</span>
+      </button>
+    </div>
+
+    <div id="mcp-row" class="mcp-row hidden">
+      <button id="mcp-open" type="button" class="mini-btn">MCP: <span id="mcp-label">select generation tool</span></button>
+      <span class="dim">used only in generate mode</span>
+    </div>
+
+    <div class="base-row">
+      <div class="base-head">
+        <button id="ref-toggle" type="button" class="mini-btn">
+          <span id="ref-toggle-arrow">▶</span> reference image (optional) <span id="base-selected-name" class="dim"></span>
+        </button>
+        <button id="base-clear" type="button" class="mini-btn hidden">clear</button>
+      </div>
+      <div id="ref-panel" class="ref-panel hidden">
+        <div class="upload-zone" id="upload-zone">
+          <input type="file" id="upload-input" accept="image/*" multiple hidden />
+          <span class="upload-hint">drop / upload a new image, or <a id="upload-link">click to upload</a> — or click any image in your library below</span>
+        </div>
+      </div>
+    </div>
+
+    <div id="attach-chip" class="attach-chip hidden">
+      <img id="attach-thumb" alt="" />
+      <span id="attach-name"></span>
+      <button id="attach-remove" type="button" aria-label="remove">×</button>
+    </div>
+
+    <textarea id="request" placeholder="e.g. a girl walking through neon-lit rain in tokyo, lonely at 2am, looking back over her shoulder — or paste/drop an image here to attach"></textarea>
+
+    <div class="actions">
+      <input type="file" id="attach-input" accept="image/*" hidden />
+      <button id="attach-btn" type="button" class="ghost" title="attach an image (or drag/drop/paste into the box)">📎 attach</button>
+      <button id="go" class="primary">forge prompt</button>
+      <span id="status"></span>
+    </div>
+    </div><!-- /composer-main -->
+
+    <aside class="taste-side">
+      <div class="taste-side-head">
+        <span class="taste-side-title">✦ taste reference <span class="dim">style only</span></span>
+        <button id="taste-clear" type="button" class="mini-btn hidden">clear</button>
+      </div>
+      <p class="taste-hint-line">Borrows the <em>look</em> — light, blur, color, grain, mood, camera vibe — never the subject. Press <strong>extract taste</strong> to activate; if you don't, it's ignored on generate.</p>
+      <div class="upload-zone taste-zone-big" id="taste-zone" tabindex="0">
+        <input type="file" id="taste-input" accept="image/*" hidden />
+        <img id="taste-thumb" class="taste-thumb-preview hidden" alt="" />
+        <span class="upload-hint" id="taste-zone-hint">drop / paste an image, <a id="taste-upload-link">click to upload</a>, or tap ✦ on any library image below</span>
+      </div>
+      <div id="taste-chip" class="attach-chip hidden">
+        <span id="taste-name"></span>
+        <button id="taste-remove" type="button" aria-label="remove">×</button>
+      </div>
+      <button id="extract-taste" type="button" class="extract-btn" disabled>✦ extract taste</button>
+      <div class="taste-swatches-row hidden" id="taste-swatches-row" title="click to view extracted taste"></div>
+      <span id="taste-status" class="taste-status"></span>
+    </aside>
+   </div><!-- /composer-cols -->
+  </section>
+
+  <section id="result" class="result hidden">
+
+    <div id="fused-badge" class="fused-badge hidden">✦ taste fused — content preserved, style applied. <button id="fused-view" type="button">view taste</button></div>
+
+    <!-- THE PROMPT — headline, on top -->
+    <div id="prompts-container"></div>
+
+    <div class="card">
+      <div class="card-head"><h2>negative prompt</h2><button class="copy-btn" data-target="neg-text">copy</button></div>
+      <pre id="neg-text"></pre>
+    </div>
+
+    <!-- supporting analysis, below the prompt -->
+    <div class="section-divider"><span>the analysis behind it</span></div>
+
+    <div id="analysis-card" class="card hidden">
+      <div class="card-head"><h2>image analysis</h2></div>
+      <div class="analysis-body">
+        <div id="analysis-subject" class="ana-line"></div>
+
+        <div class="ana-section">
+          <div class="ana-label">palette</div>
+          <div id="palette" class="palette"></div>
+        </div>
+
+        <div class="ana-section">
+          <div class="ana-label">color grade</div>
+          <div id="grade-name" class="ana-val"></div>
+          <div id="grade-bar" class="grade-bar"></div>
+          <div id="grade-stops" class="grade-stops"></div>
+          <div id="grade-notes" class="ana-sub"></div>
+        </div>
+
+        <div class="ana-section">
+          <div class="ana-label">film stock / sensor</div>
+          <div id="stock-name" class="ana-val"></div>
+          <div id="stock-tells" class="ana-sub"></div>
+        </div>
+
+        <div class="ana-section">
+          <div class="ana-label">grain</div>
+          <div id="grain-type" class="ana-val"></div>
+          <div id="grain-meta" class="ana-sub"></div>
+        </div>
+
+        <div id="analysis-lighting" class="ana-line"></div>
+        <div id="analysis-composition" class="ana-line"></div>
+        <div id="analysis-mood" class="chips"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h2>designer breakdown</h2></div>
+      <div id="breakdown" class="breakdown"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h2>style references</h2></div>
+      <div id="style-refs" class="style-refs"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h2>reference images from your library</h2></div>
+      <div id="refs" class="refs"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h2>audio pairing</h2></div>
+      <pre id="audio-text"></pre>
+    </div>
+  </section>
+
+  <section class="gallery">
+    <h2>your reference library</h2>
+    <div id="gallery" class="grid"></div>
+  </section>
+</main>
+
+<!-- Extracted-taste popup (opens only on click) -->
+<div id="taste-modal-backdrop" class="drawer-backdrop hidden"></div>
+<div id="taste-summary" class="taste-modal hidden" role="dialog" aria-label="extracted taste"></div>
+
+<script src="/app.js"></script>
+</body>
+</html>
